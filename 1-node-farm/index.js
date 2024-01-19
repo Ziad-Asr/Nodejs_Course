@@ -8,7 +8,7 @@ const replaceTemplate = require("./modules/replaceTemplate");
 ////////////////////////////////////////
 // Files
 ////////////////////////////////////////
-blocking - Synchronous way
+// blocking - Synchronous way
 const textIn = fs.readFileSync("./txt/input.txt", "utf8");
 console.log(textIn);
 const textOut = `This is what we know about avocado: ${textIn}. \nCreated in ${Date.now()}`;

@@ -5,6 +5,7 @@ const url = require("url");
 
 ////////////////////////////////////////
 // Files
+////////////////////////////////////////
 
 // // blocking - Synchronous way
 // const textIn = fs.readFileSync("./txt/input.txt", "utf8");
@@ -33,21 +34,76 @@ const url = require("url");
 
 ////////////////////////////////////////
 // Server
+///////////////////////////////////////
+const replaceTemplate = (template, productElement) => {
+  let output = template.replace(/{%PRODUCTNAME%}/g, productElement.productName);
+  output = output.replace(/{%IMAGE%}/g, productElement.image);
+  output = output.replace(/{%FROM%}/g, productElement.from);
+  output = output.replace(/{%NUTRIENTS%}/g, productElement.nutrients);
+  output = output.replace(/{%QUANTITY%}/g, productElement.quantity);
+  output = output.replace(/{%PRICE%}/g, productElement.price);
+  output = output.replace(/{%DESCRIPTION%}/g, productElement.description);
+  output = output.replace(/{%ID%}/g, productElement.id);
+
+  if (!productElement.organic)
+    output = output.replace(/{%NOT_ORGANIC%}/g, "not-organic");
+
+  return output;
+};
+
+const templateproduct = fs.readFileSync(
+  //use sync here because it will be read 1 time only when the fie run for the first time
+  `${__dirname}/templates/template-product.html`,
+  "utf-8"
+);
+const templateOverview = fs.readFileSync(
+  `${__dirname}/templates/template-overview.html`,
+  "utf-8"
+);
+const templateCard = fs.readFileSync(
+  `${__dirname}/templates/template-card.html`,
+  "utf-8"
+);
 
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`);
 const dataObj = JSON.parse(data);
 
 const server = http.createServer((req, res) => {
-  const pathName = req.url;
-  if (pathName === "/" || pathName === "/overview") {
-    res.end("This is the OVERVIEW.");
-  } else if (pathName === "/product") {
-    res.end("This is the PRODUCT.");
-  } else if (pathName === "/api") {
+  const { query, pathname } = url.parse(req.url, true);
+
+  // Overview page
+  if (pathname === "/" || pathname === "/overview") {
+    res.writeHead(200, {
+      "Content-type": "text/html",
+      // It is a must to inform the browser that the incoming response is html file.
+    });
+
+    const cardHTML = dataObj
+      .map((el) => replaceTemplate(templateCard, el))
+      .join("");
+    // Not it is an array of html onjects (<figur></figur>) that has the real data from the data file.
+
+    const output = templateOverview.replace("{%PRODUCT_CARDS%}", cardHTML);
+
+    res.end(output);
+
+    // Product page
+  } else if (pathname === "/product") {
+    res.writeHead(404, {
+      "Content-type": "text/html",
+    });
+    const product = dataObj[query.id];
+    const output = replaceTemplate(templateproduct, product);
+    res.end(output);
+
+    // Api
+  } else if (pathname === "/api") {
     res.writeHead(200, {
       "Content-type": "application/json",
     });
     res.end(data);
+
+    // Not found
   } else {
     res.writeHead(404, {
       "Content-type": "text/html",

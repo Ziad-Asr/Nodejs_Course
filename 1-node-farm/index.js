@@ -1,13 +1,14 @@
 const fs = require("fs");
 const http = require("http");
-const { dirname } = require("path");
 const url = require("url");
+const { dirname } = require("path");
+
+const replaceTemplate = require("./modules/replaceTemplate");
 
 ////////////////////////////////////////
 // Files
 ////////////////////////////////////////
-
-// // blocking - Synchronous way
+// blocking - Synchronous way
 // const textIn = fs.readFileSync("./txt/input.txt", "utf8");
 // console.log(textIn);
 // const textOut = `This is what we know about avocado: ${textIn}. \nCreated in ${Date.now()}`;
@@ -35,22 +36,6 @@ const url = require("url");
 ////////////////////////////////////////
 // Server
 ///////////////////////////////////////
-const replaceTemplate = (template, productElement) => {
-  let output = template.replace(/{%PRODUCTNAME%}/g, productElement.productName);
-  output = output.replace(/{%IMAGE%}/g, productElement.image);
-  output = output.replace(/{%FROM%}/g, productElement.from);
-  output = output.replace(/{%NUTRIENTS%}/g, productElement.nutrients);
-  output = output.replace(/{%QUANTITY%}/g, productElement.quantity);
-  output = output.replace(/{%PRICE%}/g, productElement.price);
-  output = output.replace(/{%DESCRIPTION%}/g, productElement.description);
-  output = output.replace(/{%ID%}/g, productElement.id);
-
-  if (!productElement.organic)
-    output = output.replace(/{%NOT_ORGANIC%}/g, "not-organic");
-
-  return output;
-};
-
 const templateproduct = fs.readFileSync(
   //use sync here because it will be read 1 time only when the fie run for the first time
   `${__dirname}/templates/template-product.html`,
